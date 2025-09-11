@@ -1,3 +1,19 @@
+import pymysql
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+connection = pymysql.connect(
+    host=os.getenv("MYSQL_HOST"),
+    user=os.getenv("MYSQL_USER"),
+    password=os.getenv("MYSQL_USER_PASSWORD"),
+)
+
+# Create a cursor object
+cursor = connection.cursor()
+
+query = """
 -- ============================================================
 -- Setup Script for LIBRARY Database
 -- Drops existing DB and recreates with required tables
@@ -38,27 +54,34 @@ CREATE TABLE STAFF (
     phone VARCHAR(100) NOT NULL,
     address VARCHAR(100) NOT NULL,
     join_date DATE DEFAULT (CURRENT_DATE)
-)
+);
 
 CREATE TABLE STAFF_SALARY (
     staff_id INT PRIMARY KEY,
     salary VARCHAR(10) NOT NULL,
     salary_paid DATE DEFAULT (CURRENT_DATE),
-    salary_due DATE GENERATED ALWAYS AS (DATE_ADD(salary_paid, INTERVAL 7 DAY)) STORED,
-    FOREIGN KEY (staff_id) REFERENCES STAFF(staff_id) ON DELETE CASCADE
-)
+    salary_due DATE GENERATED ALWAYS AS (DATE_ADD(salary_paid, INTERVAL 7 DAY)) STORED
+);
  
 -- ============================================================
 -- Books Table
 -- ============================================================
 
 CREATE TABLE BOOKS (
-    book_id INT AUTO_INCREMENT PRIMARY_KEY,
+    book_id INT AUTO_INCREMENT PRIMARY KEY,
+    date_added DATE DEFAULT (CURRENT_DATE),
     name VARCHAR(100) NOT NULL,
     author VARCHAR(100) NOT NULL,
     publication VARCHAR(100) NOT NULL,
     copies INT,
     lent_copies INT,
-    available copies INT GENERATED ALWAYS AS (copies - lent_copies) STORED,
-    date_added DATE DEFAULT (CURRENT_DATE) 
-)
+    available_copies INT GENERATED ALWAYS AS (copies - lent_copies) STORED
+);
+
+"""
+
+print("Database LIBRARY_DB is created!")
+
+# Close cursor and connection
+cursor.close()
+connection.close()
